@@ -41,7 +41,7 @@ function App() {
         <div className="header-content">
           <div className="header-logo">
             <img src="/sui-logo.png" alt="Sui Logo" />
-            <h1>Sui Move Smart Contract Portfolio</h1>
+            <h1>Smart Contracts Code Camp Portfolio</h1>
           </div>
         </div>
       </header>

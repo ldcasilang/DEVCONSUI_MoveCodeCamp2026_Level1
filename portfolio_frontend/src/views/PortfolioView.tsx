@@ -1,6 +1,67 @@
 import { useState, useEffect } from "react"
 
 // ============================================================================
+// CUSTOM HOOK FOR DYNAMIC META TAGS
+// ============================================================================
+const useMetaTags = (metadata: {
+  title: string;
+  description: string;
+  image: string;
+  url: string;
+  keywords?: string;
+}) => {
+  useEffect(() => {
+    // Update document title
+    document.title = metadata.title;
+
+    // Update or create meta tags
+    const metaTags = [
+      { name: 'title', content: metadata.title },
+      { name: 'description', content: metadata.description },
+      { property: 'og:title', content: metadata.title },
+      { property: 'og:description', content: metadata.description },
+      { property: 'og:image', content: metadata.image },
+      { property: 'og:url', content: metadata.url },
+      { property: 'twitter:title', content: metadata.title },
+      { property: 'twitter:description', content: metadata.description },
+      { property: 'twitter:image', content: metadata.image },
+      { name: 'keywords', content: metadata.keywords || '' },
+    ];
+
+    metaTags.forEach((tag) => {
+      const selector = 'property' in tag 
+        ? `meta[property="${tag.property}"]` 
+        : `meta[name="${tag.name}"]`;
+      
+      let element = document.querySelector(selector) as HTMLMetaElement;
+      
+      if (!element) {
+        // Create element if it doesn't exist
+        element = document.createElement('meta');
+        if ('property' in tag) {
+          element.setAttribute('property', tag.property);
+        } else {
+          element.setAttribute('name', tag.name);
+        }
+        document.head.appendChild(element);
+      }
+      
+      element.content = tag.content;
+    });
+
+    // Update canonical link
+    let canonicalLink = document.querySelector('link[rel="canonical"]') as HTMLLinkElement;
+    if (!canonicalLink) {
+      canonicalLink = document.createElement('link');
+      canonicalLink.rel = 'canonical';
+      document.head.appendChild(canonicalLink);
+    }
+    canonicalLink.href = metadata.url;
+
+  }, [metadata]);
+};
+
+// ============================================================================
 // PORTFOLIO DATA CONFIGURATION
 // ============================================================================
 const defaultPortfolioData = {
@@ -45,6 +106,22 @@ const PortfolioView = () => {
   const [portfolioData, setPortfolioData] = useState(defaultPortfolioData);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [transactionId, setTransactionId] = useState(""); // NEW: Store transaction ID
+
+  // ==========================================================================
+  // DYNAMIC META TAGS
+  // ==========================================================================
+  // Generate dynamic meta data based on portfolio
+  const metaData = {
+  title: `${portfolioData.name} | Sui Move Smart Contract Portfolio`,
+  description: `${portfolioData.about.substring(0, 150)}...`,
+  image: `${window.location.origin}/meta-devcon-sui.png`, // Changed to meta-devcon-sui.png
+  url: window.location.href,
+  keywords: `Sui Move, ${portfolioData.skills.join(', ')}, blockchain, ${portfolioData.course}, ${portfolioData.school}, smart contracts`
+};
+
+  // Apply the meta tags
+  useMetaTags(metaData);
 
   // ==========================================================================
   // FETCH DATA FROM BLOCKCHAIN
@@ -72,7 +149,7 @@ const PortfolioView = () => {
                 {
                   showContent: true,
                   showOwner: true,
-                  showPreviousTransaction: true,
+                  showPreviousTransaction: true, // This shows the transaction ID
                   showStorageRebate: true,
                   showDisplay: false,
                   showBcs: false,
@@ -89,22 +166,31 @@ const PortfolioView = () => {
           throw new Error(result.error.message || "Failed to fetch from blockchain");
         }
         
-        if (result.result?.data?.content?.fields) {
-          const fields = result.result.data.content.fields;
-         
-          const newPortfolioData = {
-            name: fields.name || defaultPortfolioData.name,
-            course: fields.course || defaultPortfolioData.course,
-            school: fields.school || defaultPortfolioData.school,
-            about: fields.about || defaultPortfolioData.about,
-            linkedin: fields.linkedin_url || defaultPortfolioData.linkedin,
-            github: fields.github_url || defaultPortfolioData.github,
-            skills: fields.skills ? fields.skills.split(",").map(s => s.trim()) : defaultPortfolioData.skills,
-          };
+        if (result.result?.data) {
+          // Store the transaction ID from the response
+          if (result.result.data.previousTransaction) {
+            setTransactionId(result.result.data.previousTransaction);
+          }
           
-          setPortfolioData(newPortfolioData);
+          if (result.result.data.content?.fields) {
+            const fields = result.result.data.content.fields;
+           
+            const newPortfolioData = {
+              name: fields.name || defaultPortfolioData.name,
+              course: fields.course || defaultPortfolioData.course,
+              school: fields.school || defaultPortfolioData.school,
+              about: fields.about || defaultPortfolioData.about,
+              linkedin: fields.linkedin_url || defaultPortfolioData.linkedin,
+              github: fields.github_url || defaultPortfolioData.github,
+              skills: fields.skills ? fields.skills.split(",").map(s => s.trim()) : defaultPortfolioData.skills,
+            };
+            
+            setPortfolioData(newPortfolioData);
+          } else {
+            throw new Error("No portfolio data found in object");
+          }
         } else {
-          throw new Error("No portfolio data found in object");
+          throw new Error("No data returned from blockchain");
         }
       } catch (err) {
         console.log("Using default data. Blockchain fetch failed:", err);
@@ -116,6 +202,12 @@ const PortfolioView = () => {
 
     fetchPortfolioData();
   }, [objectId, currentNetwork]);
+
+  // Helper function to truncate transaction ID for display
+  const truncateTxId = (txId: string) => {
+    if (txId.length <= 10) return txId;
+    return `${txId.slice(0, 8)}...${txId.slice(-4)}`;
+  };
 
   // Network toggle handler (optional - you can remove if you don't need network switching)
   const toggleNetwork = () => {
@@ -143,24 +235,6 @@ const PortfolioView = () => {
           Loading from {NETWORKS[currentNetwork].name}...
         </div>
       )}
-
-      {/* Network indicator */}
-      {/* <div style={{
-        position: 'fixed',
-        top: '10px',
-        right: '10px',
-        background: currentNetwork === 'testnet' ? '#f97316' : '#10b981',
-        color: 'white',
-        padding: '8px 16px',
-        borderRadius: '20px',
-        fontSize: '14px',
-        fontWeight: 'bold',
-        cursor: 'pointer',
-        zIndex: 1000,
-        boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
-      }} onClick={toggleNetwork}>
-        {currentNetwork.toUpperCase()} • Click to switch
-      </div> */}
 
       {/* Error message */}
       {error && (
@@ -247,7 +321,7 @@ const PortfolioView = () => {
         <div className="move-card">
           <div className="move-title">
             <img src="/sui-logo.png" alt="Move Logo" className="move-logo" />
-            <strong>Move Smart Contracts</strong>
+            <strong>About Move Smart Contracts</strong>
           </div>
 
           {/* Educational Content about Move Language */}
@@ -272,10 +346,54 @@ const PortfolioView = () => {
       {/* ===================================================================== */}
       <div className="custom-footer">
         <div className="footer-container">
-          {/* Organization Logos */}
+          {/* Organization Logos - WITH BORDER HIGHLIGHT */}
           <div className="footer-logos">
-            <img src="/devcon.png" alt="DEVCON" className="logo-img" />
-            <img src="/sui.png" alt="SUI" className="logo-img" />
+            <a 
+              href="https://devcon.ph/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              style={{ 
+                display: 'inline-block',
+                transition: 'all 0.3s ease',
+                borderRadius: '12px',
+                padding: '8px'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.border = '2px solid #3B82F6';
+                e.currentTarget.style.backgroundColor = 'rgba(59, 130, 246, 0.1)';
+                e.currentTarget.style.transform = 'scale(1.05)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.border = '2px solid transparent';
+                e.currentTarget.style.backgroundColor = 'transparent';
+                e.currentTarget.style.transform = 'scale(1)';
+              }}
+            >
+              <img src="/devcon.png" alt="DEVCON" className="logo-img" />
+            </a>
+            <a 
+              href="https://sui.io/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              style={{ 
+                display: 'inline-block',
+                transition: 'all 0.3s ease',
+                borderRadius: '12px',
+                padding: '8px'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.border = '2px solid #6C8EEF';
+                e.currentTarget.style.backgroundColor = 'rgba(108, 142, 239, 0.1)';
+                e.currentTarget.style.transform = 'scale(1.05)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.border = '2px solid transparent';
+                e.currentTarget.style.backgroundColor = 'transparent';
+                e.currentTarget.style.transform = 'scale(1)';
+              }}
+            >
+              <img src="/sui.png" alt="SUI" className="logo-img" />
+            </a>
           </div>
         
           {/* Code Camp Attribution Text */}
@@ -285,8 +403,8 @@ const PortfolioView = () => {
               fontSize: '0.9rem',
               lineHeight: '1.4'
             }}>
-              Portfolio project published during <strong>Move Smart Contracts Code Camp </strong>
-              by DEVCON Philippines & SUI Foundation
+              Portfolio project proudly built and published<br />
+              during a <strong>Move Smart Contracts Code Camp</strong> by DEVCON Philippines & SUI Foundation
             </p>
             
             {/* Project Deployment Links - Smaller and horizontal */}
@@ -298,50 +416,65 @@ const PortfolioView = () => {
               flexWrap: "wrap",
               marginTop: "0.3rem"
             }}>
-              {/* SuiScan Link */}
-              <a 
-                href={`${NETWORKS[currentNetwork].explorer}/object/${objectId}`} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                style={{
-                  color: '#6C8EEF',
-                  textDecoration: 'none',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.3rem',
+              {/* Transaction Link - DYNAMIC */}
+              {transactionId ? (
+                <a 
+                  href={`${NETWORKS[currentNetwork].explorer}/tx/${transactionId}`} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  style={{
+                    color: '#6C8EEF',
+                    textDecoration: 'none',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.3rem',
+                    padding: '0.3rem 0.6rem',
+                    borderRadius: '4px',
+                    border: '1px solid rgba(108, 142, 239, 0.3)',
+                    backgroundColor: 'rgba(108, 142, 239, 0.05)',
+                    fontSize: '0.8rem',
+                    transition: 'all 0.2s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = 'rgba(108, 142, 239, 0.1)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = 'rgba(108, 142, 239, 0.05)';
+                  }}
+                >
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="#6C8EEF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M2 17L12 22L22 17" stroke="#6C8EEF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M2 12L12 17L22 12" stroke="#6C8EEF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  View Transaction on {currentNetwork === 'testnet' ? 'Testnet' : 'Blockchain'}
+                </a>
+              ) : (
+                <div style={{
+                  color: '#666',
+                  fontSize: '0.8rem',
                   padding: '0.3rem 0.6rem',
                   borderRadius: '4px',
-                  border: '1px solid rgba(108, 142, 239, 0.3)',
-                  backgroundColor: 'rgba(108, 142, 239, 0.05)',
-                  fontSize: '0.8rem',
-                  transition: 'all 0.2s ease'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = 'rgba(108, 142, 239, 0.1)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = 'rgba(108, 142, 239, 0.05)';
-                }}
-              >
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="#6C8EEF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  <path d="M2 17L12 22L22 17" stroke="#6C8EEF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  <path d="M2 12L12 17L22 12" stroke="#6C8EEF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-                View on {currentNetwork === 'testnet' ? 'Testnet' : 'Mainnet'}
-              </a>
+                  border: '1px solid rgba(102, 102, 102, 0.2)',
+                  backgroundColor: 'rgba(102, 102, 102, 0.05)',
+                }}>
+                  Loading transaction...
+                </div>
+              )}
               
-              {/* Deployment Info */}
-              <div style={{
-                color: '#666',
-                fontSize: '0.8rem',
-                padding: '0.3rem 0.6rem',
-                borderRadius: '4px',
-                border: '1px solid rgba(102, 102, 102, 0.2)',
-                backgroundColor: 'rgba(102, 102, 102, 0.05)',
-              }}>
-                <strong>Object ID:</strong> {objectId.slice(0, 8)}...{objectId.slice(-6)}
-              </div>
+              {/* Transaction ID Info */}
+              {transactionId && (
+                <div style={{
+                  color: '#666',
+                  fontSize: '0.8rem',
+                  padding: '0.3rem 0.6rem',
+                  borderRadius: '4px',
+                  border: '1px solid rgba(102, 102, 102, 0.2)',
+                  backgroundColor: 'rgba(102, 102, 102, 0.05)',
+                }}>
+                  <strong>Tx ID:</strong> {truncateTxId(transactionId)}
+                </div>
+              )}
             </div>
           </div>
         </div>
