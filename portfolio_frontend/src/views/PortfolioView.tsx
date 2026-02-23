@@ -98,7 +98,7 @@ const PortfolioView = () => {
   // ==========================================================================
   // STATE MANAGEMENT
   // ==========================================================================
-  const objectId = "0xe6606a397cde79f1aee01ed7c21968844b360c2cea8bbc950b723dd330bcc113";
+  const objectId = "0xa3343391df96e28464499f4c209d51bf209c07392fdeea97bfeee59e7550f020";
   
   // Network state - default to testnet, can be changed if needed
   const [currentNetwork, setCurrentNetwork] = useState<"testnet" | "mainnet">("mainnet");
@@ -151,7 +151,7 @@ const PortfolioView = () => {
                   showOwner: true,
                   showPreviousTransaction: true, // This shows the transaction ID
                   showStorageRebate: true,
-                  showDisplay: false,
+                  showDisplay: true,
                   showBcs: false,
                   showType: true
                 }
@@ -341,144 +341,189 @@ const PortfolioView = () => {
         </div>
       </div>
 
-      {/* ===================================================================== */}
-      {/* FOOTER - Attribution and Logos */}
-      {/* ===================================================================== */}
-      <div className="custom-footer">
-        <div className="footer-container">
-          {/* Organization Logos - WITH BORDER HIGHLIGHT */}
-          <div className="footer-logos">
-            <a 
-              href="https://devcon.ph/" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              style={{ 
-                display: 'inline-block',
-                transition: 'all 0.3s ease',
-                borderRadius: '12px',
-                padding: '8px'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.border = '2px solid #3B82F6';
-                e.currentTarget.style.backgroundColor = 'rgba(59, 130, 246, 0.1)';
-                e.currentTarget.style.transform = 'scale(1.05)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.border = '2px solid transparent';
-                e.currentTarget.style.backgroundColor = 'transparent';
-                e.currentTarget.style.transform = 'scale(1)';
-              }}
-            >
-              <img src="/devcon.png" alt="DEVCON" className="logo-img" />
-            </a>
-            <a 
-              href="https://sui.io/" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              style={{ 
-                display: 'inline-block',
-                transition: 'all 0.3s ease',
-                borderRadius: '12px',
-                padding: '8px'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.border = '2px solid #6C8EEF';
-                e.currentTarget.style.backgroundColor = 'rgba(108, 142, 239, 0.1)';
-                e.currentTarget.style.transform = 'scale(1.05)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.border = '2px solid transparent';
-                e.currentTarget.style.backgroundColor = 'transparent';
-                e.currentTarget.style.transform = 'scale(1)';
-              }}
-            >
-              <img src="/sui.png" alt="SUI" className="logo-img" />
-            </a>
-          </div>
-        
-          {/* Code Camp Attribution Text */}
-          <div className="footer-text">
-            <p style={{ 
-              marginBottom: '0.8rem',
+  {/* ===================================================================== */}
+{/* FOOTER - Attribution and Logos */}
+{/* ===================================================================== */}
+<div className="custom-footer">
+  <div className="footer-container" style={{
+    maxWidth: '1400px',
+    margin: '0 auto',
+    padding: '2rem 2rem',
+    display: 'flex',
+    flexDirection: 'column',  // Stack items vertically
+    alignItems: 'flex-start',  // Left align everything
+    gap: '1.5rem',
+    flexWrap: 'wrap'
+  }}>
+    
+    {/* Organization Logos - Left aligned */}
+    <div className="footer-logos" style={{
+      display: 'flex',
+      gap: '2rem',  // Increased gap slightly
+      alignItems: 'center',
+      justifyContent: 'flex-start',  // Left align logos
+      width: '100%'
+    }}>
+      <a 
+        href="https://devcon.ph/" 
+        target="_blank" 
+        rel="noopener noreferrer"
+        style={{ 
+          display: 'inline-block',
+          transition: 'all 0.3s ease',
+          borderRadius: '12px',
+          padding: '8px'
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.border = '2px solid #3B82F6';
+          e.currentTarget.style.backgroundColor = 'rgba(59, 130, 246, 0.1)';
+          e.currentTarget.style.transform = 'scale(1.05)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.border = '2px solid transparent';
+          e.currentTarget.style.backgroundColor = 'transparent';
+          e.currentTarget.style.transform = 'scale(1)';
+        }}
+      >
+        <img 
+          src="/devcon.png" 
+          alt="DEVCON" 
+          className="logo-img" 
+          style={{ 
+            height: '30px',  // Increased from 40px to 60px (50% larger)
+            width: 'auto' 
+          }} 
+        />
+      </a>
+      <a 
+        href="https://sui.io/" 
+        target="_blank" 
+        rel="noopener noreferrer"
+        style={{ 
+          display: 'inline-block',
+          transition: 'all 0.3s ease',
+          borderRadius: '12px',
+          padding: '8px'
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.border = '2px solid #3B82F6';
+          e.currentTarget.style.backgroundColor = 'rgba(108, 142, 239, 0.1)';
+          e.currentTarget.style.transform = 'scale(1.05)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.border = '2px solid transparent';
+          e.currentTarget.style.backgroundColor = 'transparent';
+          e.currentTarget.style.transform = 'scale(1)';
+        }}
+      >
+        <img 
+          src="/sui.png" 
+          alt="SUI" 
+          className="logo-img" 
+          style={{ 
+            height: '30px',  // Kept at 40px
+            width: 'auto' 
+          }} 
+        />
+      </a>
+    </div>
+    
+    {/* Code Camp Attribution Text - Left aligned */}
+    <div className="footer-text" style={{
+      width: '100%',
+      maxWidth: '1000px',
+      textAlign: 'left'  // Left align text
+    }}>
+      <p style={{ 
+        margin: 0,
+        fontSize: '0.9rem',
+        lineHeight: '1.6',
+        color: '#ffffff',
+        textAlign: 'left',  // Left align
+        maxWidth: '100%',
+        fontWeight: 400,
+        letterSpacing: '0.01em'
+      }}>
+        <span style={{ fontWeight: 600, color: '#ffffff' }}>Proof of Learning Portfolio</span> project proudly built and published with informed consent during a <span style={{ fontWeight: 500, color: '#ffffff' }}>Move Smart Contracts Code Camp</span> by DEVCON Philippines & Sui Foundation — where the participant wrote, tested, and deployed a Move smart contract on Sui Mainnet. The object's immutability serves one purpose: the participant's authorship and timestamp cannot be altered, removed, or claimed by anyone else.
+      </p>
+      
+      {/* Project Deployment Links - Left aligned */}
+      <div style={{
+        display: "flex",
+        gap: "1.5rem",
+        justifyContent: "flex-start",  // Left align buttons
+        alignItems: "center",
+        flexWrap: "wrap",
+        marginTop: "1.2rem"
+      }}>
+        {/* Object Link - DYNAMIC */}
+        {objectId ? (
+          <a 
+            href={`${NETWORKS[currentNetwork].explorer}/object/${objectId}/fields`} 
+            target="_blank" 
+            rel="noopener noreferrer"
+            style={{
+              color: '#6C8EEF',
+              textDecoration: 'none',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.6rem',
+              padding: '0.5rem 1rem',
+              borderRadius: '6px',
+              border: '1px solid rgba(108, 142, 239, 0.3)',
+              backgroundColor: 'rgba(108, 142, 239, 0.05)',
               fontSize: '0.9rem',
-              lineHeight: '1.4'
-            }}>
-              Portfolio project proudly built and published<br />
-              during a <strong>Move Smart Contracts Code Camp</strong> by DEVCON Philippines & SUI Foundation
-            </p>
-            
-            {/* Project Deployment Links - Smaller and horizontal */}
-            <div style={{
-              display: "flex",
-              gap: "0.8rem",
-              justifyContent: "center",
-              alignItems: "center",
-              flexWrap: "wrap",
-              marginTop: "0.3rem"
-            }}>
-              {/* Transaction Link - DYNAMIC */}
-              {transactionId ? (
-                <a 
-                  href={`${NETWORKS[currentNetwork].explorer}/tx/${transactionId}`} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  style={{
-                    color: '#6C8EEF',
-                    textDecoration: 'none',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.3rem',
-                    padding: '0.3rem 0.6rem',
-                    borderRadius: '4px',
-                    border: '1px solid rgba(108, 142, 239, 0.3)',
-                    backgroundColor: 'rgba(108, 142, 239, 0.05)',
-                    fontSize: '0.8rem',
-                    transition: 'all 0.2s ease'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = 'rgba(108, 142, 239, 0.1)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = 'rgba(108, 142, 239, 0.05)';
-                  }}
-                >
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="#6C8EEF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M2 17L12 22L22 17" stroke="#6C8EEF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M2 12L12 17L22 12" stroke="#6C8EEF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                  Verify on {currentNetwork === 'testnet' ? 'Testnet' : 'Blockchain'}
-                </a>
-              ) : (
-                <div style={{
-                  color: '#666',
-                  fontSize: '0.8rem',
-                  padding: '0.3rem 0.6rem',
-                  borderRadius: '4px',
-                  border: '1px solid rgba(102, 102, 102, 0.2)',
-                  backgroundColor: 'rgba(102, 102, 102, 0.05)',
-                }}>
-                  Loading transaction...
-                </div>
-              )}
-              
-              {/* Transaction ID Info */}
-              {transactionId && (
-                <div style={{
-                  color: '#666',
-                  fontSize: '0.8rem',
-                  padding: '0.3rem 0.6rem',
-                  borderRadius: '4px',
-                  border: '1px solid rgba(102, 102, 102, 0.2)',
-                  backgroundColor: 'rgba(102, 102, 102, 0.05)',
-                }}>
-                  <strong>Tx ID:</strong> {truncateTxId(transactionId)}
-                </div>
-              )}
-            </div>
+              fontWeight: 500,
+              transition: 'all 0.2s ease'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = 'rgba(108, 142, 239, 0.1)';
+              e.currentTarget.style.borderColor = '#6C8EEF';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'rgba(108, 142, 239, 0.05)';
+              e.currentTarget.style.borderColor = 'rgba(108, 142, 239, 0.3)';
+            }}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="#6C8EEF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M2 17L12 22L22 17" stroke="#6C8EEF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M2 12L12 17L22 12" stroke="#6C8EEF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            Verify on Blockchain
+          </a>
+        ) : (
+          <div style={{
+            color: '#ffffff',
+            fontSize: '0.9rem',
+            padding: '0.5rem 1rem',
+            borderRadius: '6px',
+            border: '1px solid rgba(102, 102, 102, 0.2)',
+            backgroundColor: 'rgba(102, 102, 102, 0.05)',
+          }}>
+            Loading object...
           </div>
-        </div>
+        )}
+        
+        {/* Object ID Info */}
+        {objectId && (
+          <div style={{
+            color: '#ffffff',
+            fontSize: '0.85rem',
+            padding: '0.5rem 1rem',
+            borderRadius: '6px',
+            border: '1px solid rgba(102, 102, 102, 0.15)',
+            backgroundColor: 'rgba(102, 102, 102, 0.03)',
+            fontFamily: 'monospace'
+          }}>
+            <span style={{ fontWeight: 400, color: '#666' }}>Object:</span> {truncateTxId(objectId)}
+          </div>
+        )}
       </div>
+    </div>
+    
+  </div>
+</div>
     </>
   )
 }
