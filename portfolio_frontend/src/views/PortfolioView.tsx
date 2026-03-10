@@ -67,11 +67,10 @@ const useMetaTags = (metadata: {
 // PORTFOLIO DATA CONFIGURATION
 // ============================================================================
 const defaultPortfolioData = {
-  name: "LADY DIANE BAUZON CASILANG",
+  name: "ELZHOR NATINGA",
   course: "BS in Information Technology",
-  school: "FEU Institute of Technology",
-  about:
-    "I am a fourth-year IT student and freelance designer who integrates technical troubleshooting with creative insight to deliver innovative, efficient solutions.",
+  school: "Central Mindanao University",
+  about: "FULL STACK DEVELOPER | GRAPHIC DESIGNER | MOTION GRAPHIC DESIGNER",
   skills: [
     "Graphic Design",
     "UI / UX Design",
@@ -79,8 +78,8 @@ const defaultPortfolioData = {
     "Full Stack Development",
     "Web & App Development",
   ],
-  linkedin: "https://www.linkedin.com/in/ldcasilang/",
-  github: "https://github.com/ldcasilang",
+  linkedin: "https://www.linkedin.com/in/elzhor-natinga/",
+  github: "https://github.com/zhorEl",
 };
 
 // Network configuration
